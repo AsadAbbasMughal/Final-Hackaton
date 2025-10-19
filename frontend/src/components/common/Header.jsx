@@ -139,15 +139,8 @@ export default function Header() {
           <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium transition">
             Home
           </Link>
-          <Link to="/posts" className="text-gray-700 hover:text-blue-600 font-medium transition">
-            Posts
-          </Link>
-          <Link
-  to="/health-report"
-  className="text-gray-700 hover:text-blue-600 font-medium transition"
->
-  AI Health Report
-</Link>
+         
+        
 
 <Link to="/patients" className="bg-blue-500 text-white px-4 py-2 rounded-md">
   Manage Patients
@@ -162,9 +155,7 @@ export default function Header() {
                   Admin
                 </Link>
               )}
-              <Link to="/create-post" className="text-gray-700 hover:text-blue-600 font-medium transition">
-                Create Post
-              </Link>
+             
               <Link to="/profile" className="text-gray-700 hover:text-blue-600 font-medium transition">
                 {user.name || "Profile"}
               </Link>

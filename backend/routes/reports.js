@@ -1,7 +1,6 @@
 import express from "express";
 import Report from "../models/Report.js";
-import upload from "../config/multer.js";
-import cloudinary from "../config/cloudinary.js";
+import axios from "axios";
 
 const router = express.Router();
 
@@ -15,28 +14,30 @@ router.get("/patient/:id", async (req, res) => {
   }
 });
 
-// Upload image to Cloudinary
-router.post("/upload", upload.single("file"), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-
-    const result = await cloudinary.v2.uploader.upload_stream(
-      { folder: "patient-reports" },
-      (error, result) => {
-        if (error) return res.status(500).json({ message: "Cloudinary upload failed", error });
-        res.json({ url: result.secure_url });
-      }
-    ).end(req.file.buffer);
-  } catch (err) {
-    res.status(500).json({ message: "Upload failed", error: err });
-  }
-});
-
 // Add new report
 router.post("/", async (req, res) => {
   try {
     const report = new Report(req.body);
     await report.save();
+
+    // Call Gemini after saving report
+    try {
+      const geminiRes = await axios.post(
+        "http://localhost:8000/api/gemini",
+        {
+          patientId: report.patient,
+          username: "example_username",
+          title: report.title,
+          description: report.description,
+          imageBinary: report.image, // already Base64 or URL
+          file: report.file || null
+        }
+      );
+      report.geminiAnalysis = geminiRes.data.analysis; // attach response
+    } catch (err) {
+      console.error("Gemini call failed:", err.message);
+    }
+
     res.status(201).json(report);
   } catch (err) {
     res.status(400).json({ message: "Error creating report" });
